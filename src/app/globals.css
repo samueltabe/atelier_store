@@ -1,26 +1,189 @@
 @import "tailwindcss";
 
+/*
+  Design system: quiet, editorial luxury-retail aesthetic — neutral paper/ink
+  palette, restrained wide-tracked uppercase for navigation/labels, generous
+  whitespace, hairline dividers, sharp (non-rounded) corners. Inspired by the
+  conventions of high-end fashion e-commerce (minimal chrome, oversized
+  imagery, product takes the color) — no brand-specific assets, type, or
+  copy from any reference site.
+*/
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Surfaces */
+  --color-paper: #faf9f6;
+  --color-paper-raised: #f2f0ea;
+  --color-ink: #121210;
+  --color-ink-soft: #4a473f;
+  --color-stone: #8d897d;
+  --color-line: #ddd9cf;
+
+  /* Accent is intentionally neutral — swap this one token when a brand
+     palette is introduced; nothing else should hardcode a brand color. */
+  --color-accent: #121210;
+
+  /* Type scale: font-size / line-height pairs (Tailwind v4 reads these as a pair) */
+  --text-display: 4rem;
+  --text-display--line-height: 1.02;
+  --text-h1: 2.5rem;
+  --text-h1--line-height: 1.08;
+  --text-h2: 1.75rem;
+  --text-h2--line-height: 1.15;
+  --text-h3: 1.125rem;
+  --text-h3--line-height: 1.3;
+  --text-body: 1rem;
+  --text-body--line-height: 1.65;
+  --text-small: 0.8125rem;
+  --text-small--line-height: 1.5;
+  --text-eyebrow: 0.6875rem;
+  --text-eyebrow--line-height: 1.4;
+
+  /* Wide tracking for nav/labels/buttons, distinct from Tailwind's default tracking-widest */
+  --tracking-luxe: 0.16em;
+
+  /* Large editorial canvas with fluid gutters */
+  --container-max: 90rem;
+  --container-gutter: clamp(1.25rem, 4vw, 4rem);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-paper: var(--color-paper);
+  --color-paper-raised: var(--color-paper-raised);
+  --color-ink: var(--color-ink);
+  --color-ink-soft: var(--color-ink-soft);
+  --color-stone: var(--color-stone);
+  --color-line: var(--color-line);
+  --color-accent: var(--color-accent);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  --text-display: var(--text-display);
+  --text-display--line-height: var(--text-display--line-height);
+  --text-h1: var(--text-h1);
+  --text-h1--line-height: var(--text-h1--line-height);
+  --text-h2: var(--text-h2);
+  --text-h2--line-height: var(--text-h2--line-height);
+  --text-h3: var(--text-h3);
+  --text-h3--line-height: var(--text-h3--line-height);
+  --text-body: var(--text-body);
+  --text-body--line-height: var(--text-body--line-height);
+  --text-small: var(--text-small);
+  --text-small--line-height: var(--text-small--line-height);
+  --text-eyebrow: var(--text-eyebrow);
+  --text-eyebrow--line-height: var(--text-eyebrow--line-height);
+
+  --tracking-luxe: var(--tracking-luxe);
+
+  --radius-none: 0px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  * {
+    border-color: var(--color-line);
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+
+  a {
+    color: inherit;
+  }
+
+  ::selection {
+    background: var(--color-ink);
+    color: var(--color-paper);
+  }
+
+  :focus-visible {
+    outline: 1px solid var(--color-ink);
+    outline-offset: 2px;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Wide-tracked uppercase label used for nav items, eyebrows, and button text.
+   Defined with @utility (not @layer components) so it remains usable via @apply. */
+@utility label-luxe {
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-luxe);
+  font-size: var(--text-eyebrow);
+  line-height: var(--text-eyebrow--line-height);
+}
+
+/* Base button sizing/type, as a utility (not @layer components) so the
+   variants below can @apply it alongside color utilities. */
+@utility btn {
+  @apply label-luxe inline-flex items-center justify-center gap-2 rounded-none px-7 py-3.5 transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-40;
+}
+
+@layer components {
+  /* Fluid-gutter editorial container, wider than Tailwind's default `container` */
+  .container-edit {
+    width: 100%;
+    max-width: var(--container-max);
+    margin-inline: auto;
+    padding-inline: var(--container-gutter);
+  }
+
+  .nav-link {
+    @apply label-luxe relative inline-block py-1 text-ink-soft transition-colors duration-200;
+  }
+  .nav-link::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 100%;
+    bottom: -1px;
+    height: 1px;
+    background: currentColor;
+    transition: right 250ms ease;
+  }
+  .nav-link:hover {
+    @apply text-ink;
+  }
+  .nav-link:hover::after {
+    right: 0;
+  }
+
+  .btn-primary {
+    @apply btn bg-ink text-paper hover:bg-ink-soft;
+  }
+  .btn-outline {
+    @apply btn border border-ink bg-transparent text-ink hover:bg-ink hover:text-paper;
+  }
+  .btn-ghost {
+    @apply btn border border-transparent bg-transparent text-ink-soft hover:border-line hover:text-ink;
+  }
+
+  /* Hairline divider, the only border weight the system uses */
+  .divider {
+    border-top: 1px solid var(--color-line);
+  }
+
+  /* Responsive product/content grid primitive: 1 → 2 → 4 columns */
+  .grid-edit {
+    @apply grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-4;
+  }
+
+  .section-edit {
+    @apply py-16 sm:py-24 lg:py-32;
+  }
 }
