@@ -14,7 +14,6 @@ Next.js 16 e-commerce app (App Router, TypeScript, Tailwind v4, Drizzle ORM agai
 - `npx tsc --noEmit` — type-check only (no dedicated script)
 - `npm run db:generate` — generate SQL migrations from `src/db/schema.ts` via drizzle-kit
 - `npm run db:push` — push schema directly to the database (no migration files)
-- `npm run db:studio` — open Drizzle Studio
 - `npm run db:seed` — populate `categories`/`products` with the 16-product sample catalog (idempotent, uses `onConflictDoNothing`); requires `DATABASE_URL` in `.env.local`. Runs as `tsx --env-file=.env.local src/db/seed.ts` — the `--env-file` flag is load-bearing: a `dotenv.config()` call inside `seed.ts` would run too late, since static `import`s (including the one that pulls in `src/db/index.ts`, which throws if `DATABASE_URL` is unset) are hoisted above it.
 - `npx @better-auth/cli generate` — scaffold the Better Auth tables (`user`, `session`, `account`, `verification`) into `src/db/schema.ts`; run this before `db:push`/`db:generate` will produce anything auth-related
 
@@ -61,3 +60,4 @@ This project is on Next.js 16, which has substantial breaking changes vs. Next 1
 - `package.json`/`package-lock.json` and `.git` were created by `create-next-app`; no commits have been made beyond the initial scaffold.
 - `src/lib/nav-links.ts` hardcodes `/shop?category=women` etc. independently of the `categories` table — it also contains non-category entries ("New Arrivals", "Collections"), so it's intentionally not derived from the DB. Don't "fix" this into a DB-driven list without checking whether that's actually wanted.
 - There is no `src/lib/sample-data.ts` anymore — it was deleted when the storefront moved to the real `categories`/`products` tables. If you see a reference to it (e.g. in an old diff or your own memory of an earlier version of this repo), it's stale.
+- There is no `db:studio` script. `drizzle-kit`'s Studio proxy server (as of the current latest, `0.31.11`) doesn't validate the request `Origin` before forwarding SQL to the DB behind `DATABASE_URL`, so any page open in the same browser while Studio is running can ride that local connection via DNS rebinding and execute arbitrary SQL with the operator's DB role (CWE-942). No patched release exists yet. If you need Studio, run `npx drizzle-kit studio` manually, close it immediately after, and don't leave it running while browsing untrusted sites — don't re-add it as an `npm run` convenience script.
